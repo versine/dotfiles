@@ -1,0 +1,44 @@
+brew bundle --file=- <<EOF
+cask "docker"
+cask "docker-toolbox"
+cask "spectacle"
+brew "go"
+brew "glew"
+brew "glm"
+brew "python3"
+cask "macvim"
+cask "mactex"
+cask "gimp"
+cask "xquartz"
+cask "inkscape"
+cask "blender"
+cask "google-chrome"
+cask "microsoft-office"
+cask "iterm2"
+brew "pandoc"
+EOF
+
+default_docker_machine() {
+  docker-machine ls | grep -Fq "default"
+}
+
+if ! default_docker_machine; then
+  docker-machine create --driver virtualbox default
+fi
+
+default_docker_machine_running() {
+  default_docker_machine | grep -Fq "Running"
+}
+
+if ! default_docker_machine_running; then
+  docker-machine start default
+fi
+
+fancy_echo "Cleaning up old Homebrew formulae ..."
+brew cleanup
+brew cask cleanup
+
+if [ -r "$HOME/.rcrc" ]; then
+  fancy_echo "Updating dotfiles ..."
+  rcup
+fi
